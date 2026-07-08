@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Obesity Level Prediction | Demo</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#050508;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+    .card{background:#13131f;border:1px solid #1e1e35;border-radius:16px;padding:2rem;max-width:520px;width:100%;box-shadow:0 0 40px #00d4ff11}
+    h1{font-size:1.5rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    p.sub{color:#64748b;font-size:.875rem;margin-bottom:1.5rem}
+    label{display:block;font-size:.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+    input,select{width:100%;background:#0e0e16;border:1px solid #1e1e35;border-radius:8px;padding:.6rem .8rem;color:#e2e8f0;font-size:.875rem;margin-bottom:1rem;outline:none;appearance:none}
+    input:focus,select:focus{border-color:#00d4ff44}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    button{width:100%;padding:.85rem;background:#00d4ff;color:#050508;font-weight:700;font-size:.9rem;border:none;border-radius:8px;cursor:pointer;margin-top:.5rem;transition:background .2s}
+    button:hover{background:#00b8d9}
+    #result{display:none;margin-top:1.5rem;background:#0e0e16;border:1px solid #00d4ff22;border-radius:10px;padding:1.25rem;text-align:center}
+    .pred{font-size:1.6rem;font-weight:800;color:#00d4ff;margin:.5rem 0}
+    .conf{font-size:.8rem;color:#64748b;margin-top:.4rem}
+    .bmi-badge{display:inline-block;background:#7c3aed22;border:1px solid #7c3aed44;color:#a78bfa;border-radius:8px;padding:.35rem .8rem;font-size:.8rem;margin-top:.6rem}
+    .badge{display:inline-block;background:#00d4ff15;border:1px solid #00d4ff33;color:#00d4ff;border-radius:999px;padding:.25rem .75rem;font-size:.75rem;margin-bottom:1rem}
+    .divider{border:none;border-top:1px solid #1e1e35;margin:1rem 0}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">AI Demo</span>
+    <h1>Obesity Level Prediction</h1>
+    <p class="sub">Classify obesity level based on physical attributes and lifestyle factors using a machine learning model.</p>
+    <hr class="divider">
+    <label>Gender</label>
+    <select id="gender">
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <div class="row">
+      <div>
+        <label>Age</label>
+        <input type="number" id="age" value="28" min="15" max="80">
+      </div>
+      <div>
+        <label>Physical Activity Level</label>
+        <select id="activity">
+          <option value="Low">Low</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Height (cm)</label>
+        <input type="number" id="height" value="170" min="130" max="220">
+      </div>
+      <div>
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" value="75" min="30" max="200">
+      </div>
+    </div>
+    <label>Vegetable Consumption Frequency (1=Low, 3=High)</label>
+    <select id="veg_freq">
+      <option value="1">1 - Low</option>
+      <option value="2" selected>2 - Medium</option>
+      <option value="3">3 - High</option>
+    </select>
+    <button onclick="predict()">Analyze Obesity Level</button>
+    <div id="result">
+      <p style="color:#64748b;font-size:.8rem">Predicted Obesity Level</p>
+      <div class="pred" id="pred-value">-</div>
+      <div class="bmi-badge" id="bmi-value">BMI: -</div>
+      <div class="conf" id="conf-value">-</div>
+    </div>
+  </div>
+  <script>
+  async function predict() {
+    const data = {
+      gender: document.getElementById('gender').value,
+      age: parseInt(document.getElementById('age').value),
+      height: parseFloat(document.getElementById('height').value),
+      weight: parseFloat(document.getElementById('weight').value),
+      activity: document.getElementById('activity').value,
+      veg_freq: parseInt(document.getElementById('veg_freq').value),
+    };
+    try {
+      const r = await fetch('/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+      const j = await r.json();
+      document.getElementById('pred-value').textContent = j.prediction;
+      document.getElementById('bmi-value').textContent = 'BMI: ' + j.bmi;
+      document.getElementById('conf-value').textContent = 'Confidence: ' + (j.confidence * 100).toFixed(1) + '%';
+      document.getElementById('result').style.display = 'block';
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
+  </script>
+</body>
+</html>
