@@ -1,99 +1,791 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Obesity Level Prediction | Demo</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#050508;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
-    .card{background:#13131f;border:1px solid #1e1e35;border-radius:16px;padding:2rem;max-width:520px;width:100%;box-shadow:0 0 40px #00d4ff11}
-    h1{font-size:1.5rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    p.sub{color:#64748b;font-size:.875rem;margin-bottom:1.5rem}
-    label{display:block;font-size:.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
-    input,select{width:100%;background:#0e0e16;border:1px solid #1e1e35;border-radius:8px;padding:.6rem .8rem;color:#e2e8f0;font-size:.875rem;margin-bottom:1rem;outline:none;appearance:none}
-    input:focus,select:focus{border-color:#00d4ff44}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    button{width:100%;padding:.85rem;background:#00d4ff;color:#050508;font-weight:700;font-size:.9rem;border:none;border-radius:8px;cursor:pointer;margin-top:.5rem;transition:background .2s}
-    button:hover{background:#00b8d9}
-    #result{display:none;margin-top:1.5rem;background:#0e0e16;border:1px solid #00d4ff22;border-radius:10px;padding:1.25rem;text-align:center}
-    .pred{font-size:1.6rem;font-weight:800;color:#00d4ff;margin:.5rem 0}
-    .conf{font-size:.8rem;color:#64748b;margin-top:.4rem}
-    .bmi-badge{display:inline-block;background:#7c3aed22;border:1px solid #7c3aed44;color:#a78bfa;border-radius:8px;padding:.35rem .8rem;font-size:.8rem;margin-top:.6rem}
-    .badge{display:inline-block;background:#00d4ff15;border:1px solid #00d4ff33;color:#00d4ff;border-radius:999px;padding:.25rem .75rem;font-size:.75rem;margin-bottom:1rem}
-    .divider{border:none;border-top:1px solid #1e1e35;margin:1rem 0}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <span class="badge">AI Demo</span>
-    <h1>Obesity Level Prediction</h1>
-    <p class="sub">Classify obesity level based on physical attributes and lifestyle factors using a machine learning model.</p>
-    <hr class="divider">
-    <label>Gender</label>
-    <select id="gender">
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select>
-    <div class="row">
-      <div>
-        <label>Age</label>
-        <input type="number" id="age" value="28" min="15" max="80">
-      </div>
-      <div>
-        <label>Physical Activity Level</label>
-        <select id="activity">
-          <option value="Low">Low</option>
-          <option value="Medium" selected>Medium</option>
-          <option value="High">High</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Height (cm)</label>
-        <input type="number" id="height" value="170" min="130" max="220">
-      </div>
-      <div>
-        <label>Weight (kg)</label>
-        <input type="number" id="weight" value="75" min="30" max="200">
-      </div>
-    </div>
-    <label>Vegetable Consumption Frequency (1=Low, 3=High)</label>
-    <select id="veg_freq">
-      <option value="1">1 - Low</option>
-      <option value="2" selected>2 - Medium</option>
-      <option value="3">3 - High</option>
-    </select>
-    <button onclick="predict()">Analyze Obesity Level</button>
-    <div id="result">
-      <p style="color:#64748b;font-size:.8rem">Predicted Obesity Level</p>
-      <div class="pred" id="pred-value">-</div>
-      <div class="bmi-badge" id="bmi-value">BMI: -</div>
-      <div class="conf" id="conf-value">-</div>
-    </div>
-  </div>
-  <script>
-  async function predict() {
-    const data = {
-      gender: document.getElementById('gender').value,
-      age: parseInt(document.getElementById('age').value),
-      height: parseFloat(document.getElementById('height').value),
-      weight: parseFloat(document.getElementById('weight').value),
-      activity: document.getElementById('activity').value,
-      veg_freq: parseInt(document.getElementById('veg_freq').value),
-    };
-    try {
-      const r = await fetch('/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
-      const j = await r.json();
-      document.getElementById('pred-value').textContent = j.prediction;
-      document.getElementById('bmi-value').textContent = 'BMI: ' + j.bmi;
-      document.getElementById('conf-value').textContent = 'Confidence: ' + (j.confidence * 100).toFixed(1) + '%';
-      document.getElementById('result').style.display = 'block';
-    } catch(e) {
-      alert('Error: ' + e.message);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obesity Risk Assessment</title>
+<style>
+  :root{
+    --bg:#F6FAF8;
+    --surface:#FFFFFF;
+    --surface-2:#EFF6F2;
+    --ink:#14231F;
+    --ink-soft:#52655D;
+    --ink-faint:#8AA098;
+    --border:#DCE8E2;
+    --border-soft:#E9F1EC;
+    --teal:#0E9384;
+    --teal-deep:#0B6E63;
+    --teal-tint:#E3F4F0;
+    --blue:#3A78C2;
+    --blue-tint:#E7F0FA;
+    --amber:#C97A16;
+    --amber-tint:#FBF0DF;
+    --coral:#C4452B;
+    --coral-tint:#FBE7E1;
+    --shadow:0 1px 2px rgba(20,35,31,.04), 0 12px 28px -16px rgba(20,35,31,.16);
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:9px;
+    --font-display:"Iowan Old Style","Sitka Text","Palatino Linotype",Georgia,serif;
+    --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Consolas,"Liberation Mono",monospace;
+    color-scheme:light;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1613;
+    --surface:#111F1B;
+    --surface-2:#16261F;
+    --ink:#E7F3EE;
+    --ink-soft:#A7BCB3;
+    --ink-faint:#6C8079;
+    --border:#213A32;
+    --border-soft:#1A2E28;
+    --teal:#2DD4BF;
+    --teal-deep:#59E6D2;
+    --teal-tint:#123832;
+    --blue:#6FA6E0;
+    --blue-tint:#122A3E;
+    --amber:#F0B15C;
+    --amber-tint:#3A2C10;
+    --coral:#F0836A;
+    --coral-tint:#3A1B14;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 16px 32px -18px rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B1613;--surface:#111F1B;--surface-2:#16261F;--ink:#E7F3EE;--ink-soft:#A7BCB3;--ink-faint:#6C8079;
+      --border:#213A32;--border-soft:#1A2E28;--teal:#2DD4BF;--teal-deep:#59E6D2;--teal-tint:#123832;
+      --blue:#6FA6E0;--blue-tint:#122A3E;--amber:#F0B15C;--amber-tint:#3A2C10;--coral:#F0836A;--coral-tint:#3A1B14;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 16px 32px -18px rgba(0,0,0,.55);color-scheme:dark;
     }
   }
-  </script>
+  *,*::before,*::after{box-sizing:border-box}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  }
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;transition:background .3s ease,color .3s ease;
+  }
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.15em;flex-shrink:0}
+  .wrap{max-width:1180px;margin:0 auto;padding:2.25rem 1.5rem 4rem}
+
+  /* ---------- header ---------- */
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.1rem}
+  .eyebrow{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-deep);background:var(--teal-tint);border:1px solid var(--border);padding:.3rem .65rem;border-radius:999px;margin-bottom:.85rem}
+  h1{font-family:var(--font-display);font-size:clamp(1.75rem,3.4vw,2.5rem);font-weight:600;line-height:1.08;margin:0 0 .5rem;letter-spacing:-.01em}
+  .dek{color:var(--ink-soft);font-size:.95rem;max-width:46ch;line-height:1.55;margin:0}
+  .theme-toggle{
+    display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;flex-shrink:0;
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;cursor:pointer;color:var(--ink-soft);
+    box-shadow:var(--shadow);transition:transform .15s ease,color .2s ease,border-color .2s ease;
+  }
+  .theme-toggle:hover{color:var(--teal);border-color:var(--teal)}
+  .theme-toggle:active{transform:scale(.92)}
+  .theme-toggle .icon{width:1.15rem;height:1.15rem}
+  .theme-toggle .icon-sun{display:none}
+  :root[data-theme="dark"] .theme-toggle .icon-moon{display:none}
+  :root[data-theme="dark"] .theme-toggle .icon-sun{display:inline-block}
+
+  .tick-strip{height:14px;margin:0 0 2.25rem;background-image:repeating-linear-gradient(90deg,var(--border) 0 1px,transparent 1px 8px);background-position:bottom left;background-size:100% 8px;background-repeat:repeat-x;opacity:.9}
+
+  /* ---------- layout ---------- */
+  .layout{display:grid;grid-template-columns:1fr;gap:1.75rem}
+  @media (min-width:960px){
+    .layout{grid-template-columns:1.05fr .95fr;align-items:start}
+    .results-col{position:sticky;top:1.5rem}
+  }
+
+  /* ---------- panels ---------- */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.25rem;transition:background .3s ease,border-color .3s ease}
+  .panel:last-child{margin-bottom:0}
+  .panel-head{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:1.2rem}
+  .panel-head .icon-wrap{width:2.2rem;height:2.2rem;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--teal-tint);color:var(--teal-deep);flex-shrink:0}
+  .panel-head .icon-wrap .icon{width:1.15rem;height:1.15rem}
+  .panel-head h2{font-family:var(--font-display);font-size:1.12rem;font-weight:600;margin:0 0 .18rem}
+  .panel-head p{font-size:.8rem;color:var(--ink-faint);margin:0;line-height:1.4}
+
+  /* ---------- form fields ---------- */
+  .field{margin-bottom:1.1rem}
+  .field:last-child{margin-bottom:0}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  label.field-label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.4rem}
+  .hint{font-size:.72rem;color:var(--ink-faint);margin-top:.35rem}
+  input[type="number"],select{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:.65rem .75rem;font-size:.9rem;color:var(--ink);font-family:var(--font-body);outline:none;appearance:none;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2352655D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;background-position:right .65rem center;background-size:1rem;padding-right:2.1rem;
+  }
+  input[type="number"]:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-tint)}
+
+  /* ---------- toggle switches ---------- */
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border-soft)}
+  .toggle-row:last-child{border-bottom:none;padding-bottom:0}
+  .toggle-row:first-child{padding-top:0}
+  .toggle-text{display:flex;align-items:flex-start;gap:.65rem}
+  .toggle-text .icon{width:1.15rem;height:1.15rem;margin-top:.15rem;color:var(--ink-faint);flex-shrink:0}
+  .toggle-text strong{display:block;font-size:.87rem;font-weight:600;color:var(--ink)}
+  .toggle-text span{display:block;font-size:.74rem;color:var(--ink-faint);margin-top:.1rem}
+  .switch{position:relative;width:2.6rem;height:1.55rem;flex-shrink:0}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+  .switch .track{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:background .2s ease}
+  .switch .thumb{position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s ease}
+  .switch input:checked ~ .track{background:var(--teal)}
+  .switch input:checked ~ .thumb{transform:translateX(1.05rem)}
+  .switch input:focus-visible ~ .track{outline:2px solid var(--teal);outline-offset:2px}
+
+  /* ---------- sliders ---------- */
+  .slider-field{margin-bottom:1.3rem}
+  .slider-field:last-child{margin-bottom:0}
+  .slider-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:.5rem}
+  .slider-top .label-group{display:flex;align-items:center;gap:.5rem}
+  .slider-top .icon{width:1.1rem;height:1.1rem;color:var(--ink-faint)}
+  .slider-top strong{font-size:.87rem;font-weight:600}
+  .slider-value{font-family:var(--font-mono);font-size:.75rem;font-weight:600;color:var(--teal-deep);background:var(--teal-tint);padding:.2rem .55rem;border-radius:999px;white-space:nowrap}
+  input[type="range"]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;background:var(--border);outline:none;cursor:pointer;margin:.3rem 0}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--teal);border:3px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer;transition:transform .12s ease}
+  input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.12)}
+  input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--teal);border:3px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:pointer}
+  input[type="range"]:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
+  .slider-scale{display:flex;justify-content:space-between;font-size:.68rem;color:var(--ink-faint);margin-top:.3rem}
+
+  /* ---------- gender select emphasis row ---------- */
+  .field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+  /* ---------- submit button ---------- */
+  .submit-btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:.55rem;
+    background:var(--teal);color:#04211D;font-weight:700;font-size:.92rem;border:none;border-radius:12px;
+    padding:.95rem 1rem;cursor:pointer;margin-top:.4rem;transition:background .18s ease,transform .1s ease,box-shadow .18s ease;
+    box-shadow:0 10px 24px -12px rgba(14,147,132,.55);
+  }
+  .submit-btn:hover{background:var(--teal-deep)}
+  .submit-btn:active{transform:scale(.99)}
+  .submit-btn:disabled{opacity:.75;cursor:progress}
+  .submit-btn .icon{width:1.05rem;height:1.05rem}
+  .spinner{width:1rem;height:1rem;border-radius:50%;border:2px solid rgba(4,33,29,.3);border-top-color:#04211D;animation:spin .7s linear infinite;display:none}
+  .submit-btn.is-loading .spinner{display:inline-block}
+  .submit-btn.is-loading .btn-icon{display:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- results: empty / error / loading ---------- */
+  .state-card{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius-lg);padding:2.75rem 1.75rem;text-align:center;color:var(--ink-faint)}
+  .state-card .icon-wrap{width:3rem;height:3rem;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--ink-faint)}
+  .state-card .icon-wrap .icon{width:1.4rem;height:1.4rem}
+  .state-card h3{font-family:var(--font-display);font-size:1.05rem;color:var(--ink);margin:0 0 .4rem;font-weight:600}
+  .state-card p{font-size:.83rem;line-height:1.55;max-width:32ch;margin:0 auto}
+  .error-card{border:1px solid var(--coral);background:var(--coral-tint)}
+  .error-card .icon-wrap{background:transparent;color:var(--coral)}
+  .error-card h3{color:var(--coral)}
+  .error-card p{color:var(--ink-soft)}
+  .error-msg{font-family:var(--font-mono);font-size:.72rem;color:var(--coral);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;margin-top:.9rem;word-break:break-word;display:inline-block;max-width:100%}
+  .retry-btn{margin-top:1.1rem;background:var(--coral);color:#fff;border:none;border-radius:10px;padding:.55rem 1.1rem;font-size:.8rem;font-weight:700;cursor:pointer}
+  .retry-btn:hover{opacity:.9}
+
+  /* ---------- prediction card ---------- */
+  .pred-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.6rem;margin-bottom:1.25rem}
+  .pred-top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.1rem}
+  .pred-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .accuracy-tag{font-family:var(--font-mono);font-size:.68rem;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--border);padding:.25rem .55rem;border-radius:999px}
+  .pred-badge{display:flex;align-items:center;gap:.9rem}
+  .pred-badge .icon-wrap{width:3rem;height:3rem;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .pred-badge .icon-wrap .icon{width:1.5rem;height:1.5rem}
+  .pred-name{font-family:var(--font-display);font-size:1.5rem;font-weight:600;line-height:1.1;margin:0}
+  .pred-sub{font-size:.78rem;color:var(--ink-faint);margin-top:.25rem}
+  .confidence-row{margin-top:1.15rem}
+  .confidence-labels{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink-soft);margin-bottom:.35rem}
+  .confidence-labels strong{font-family:var(--font-mono);color:var(--ink)}
+  .confidence-track{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+  .confidence-fill{height:100%;border-radius:999px;width:0%;transition:width .7s cubic-bezier(.22,.9,.3,1)}
+
+  .bucket-under .icon-wrap,.bucket-under .confidence-fill{background:var(--blue)}
+  .bucket-under .pred-badge .icon-wrap{background:var(--blue-tint);color:var(--blue)}
+  .bucket-normal .icon-wrap,.bucket-normal .confidence-fill{background:var(--teal)}
+  .bucket-normal .pred-badge .icon-wrap{background:var(--teal-tint);color:var(--teal-deep)}
+  .bucket-over .icon-wrap,.bucket-over .confidence-fill{background:var(--amber)}
+  .bucket-over .pred-badge .icon-wrap{background:var(--amber-tint);color:var(--amber)}
+  .bucket-obese .icon-wrap,.bucket-obese .confidence-fill{background:var(--coral)}
+  .bucket-obese .pred-badge .icon-wrap{background:var(--coral-tint);color:var(--coral)}
+
+  /* ---------- BMI gauge ---------- */
+  .gauge-value-row{display:flex;align-items:baseline;gap:.6rem;margin-bottom:1.1rem}
+  .gauge-value{font-family:var(--font-mono);font-size:2.1rem;font-weight:700;color:var(--ink);line-height:1}
+  .gauge-cat{font-size:.85rem;font-weight:700;padding:.22rem .65rem;border-radius:999px}
+  .gauge{position:relative;height:16px;margin-bottom:.55rem}
+  .gauge-track{display:flex;width:100%;height:100%;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+  .gauge-zone{height:100%}
+  .gauge-zone[data-zone="under"]{background:var(--blue)}
+  .gauge-zone[data-zone="normal"]{background:var(--teal)}
+  .gauge-zone[data-zone="over"]{background:var(--amber)}
+  .gauge-zone[data-zone="obese"]{background:var(--coral)}
+  .gauge-zone{opacity:.35;transition:opacity .3s ease}
+  .gauge-zone.active-zone{opacity:1}
+  .gauge-marker{position:absolute;top:-14px;left:0%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transition:left .8s cubic-bezier(.22,.9,.3,1)}
+  .gauge-marker-value{font-family:var(--font-mono);font-size:.68rem;font-weight:700;background:var(--ink);color:var(--bg);padding:.12rem .4rem;border-radius:5px;white-space:nowrap;margin-bottom:2px}
+  .gauge-marker-pin{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink)}
+  .gauge-labels{display:flex;justify-content:space-between;font-size:.66rem;color:var(--ink-faint);margin-top:.5rem;text-align:left;gap:.25rem}
+  .gauge-labels span{flex:1}
+  .gauge-labels span:last-child{text-align:right}
+  .gauge-labels small{display:block;opacity:.8}
+
+  /* ---------- bar lists (probabilities / feature importance) ---------- */
+  .bar-list{display:flex;flex-direction:column;gap:.65rem}
+  .bar-row .bar-row-top{display:flex;justify-content:space-between;align-items:baseline;font-size:.78rem;margin-bottom:.28rem;gap:.5rem}
+  .bar-row-top .bar-label{color:var(--ink-soft);font-weight:600;display:flex;align-items:center;gap:.4rem}
+  .bar-row-top .bar-value{font-family:var(--font-mono);color:var(--ink-faint);white-space:nowrap}
+  .bar-row.is-top .bar-row-top .bar-label{color:var(--ink)}
+  .bar-row.is-top .bar-row-top .bar-value{color:var(--ink);font-weight:700}
+  .top-tag{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--teal-tint);color:var(--teal-deep);padding:.08rem .4rem;border-radius:999px}
+  .bar-track{height:9px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+  .bar-fill{height:100%;border-radius:999px;width:0%;background:var(--ink-faint);transition:width .7s cubic-bezier(.22,.9,.3,1)}
+  .bar-fill.b-under{background:var(--blue)}
+  .bar-fill.b-normal{background:var(--teal)}
+  .bar-fill.b-over{background:var(--amber)}
+  .bar-fill.b-obese{background:var(--coral)}
+
+  .footnote{font-size:.72rem;color:var(--ink-faint);line-height:1.6;margin-top:1.75rem;text-align:center}
+  .footnote strong{color:var(--ink-soft)}
+
+  @media (max-width:520px){
+    .grid-2,.field-row-2{grid-template-columns:1fr}
+    .panel{padding:1.15rem}
+    .wrap{padding:1.5rem 1rem 3rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <span class="eyebrow">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+        Machine Learning Demo
+      </span>
+      <h1>Obesity Risk Assessment</h1>
+      <p class="dek">Estimate an obesity classification from eating habits and physical condition, using a model trained on 2,111 records from the UCI obesity dataset. Portfolio demo — not medical advice.</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      <svg class="icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.4M12 19.6V22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2 12h2.4M19.6 12H22M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>
+    </button>
+  </header>
+
+  <div class="tick-strip" aria-hidden="true"></div>
+
+  <div class="layout">
+    <!-- ============ FORM COLUMN ============ -->
+    <div class="form-col">
+      <form id="assessment-form" novalidate>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></span>
+            <div>
+              <h2>Personal Information</h2>
+              <p>Basic physical attributes used to compute your BMI.</p>
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label class="field-label" for="gender">Gender</label>
+              <select id="gender">
+                <option value="Female" selected>Female</option>
+                <option value="Male">Male</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="age">Age</label>
+              <input type="number" id="age" value="28" min="14" max="100" step="1">
+            </div>
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label class="field-label" for="height">Height (m)</label>
+              <input type="number" id="height" value="1.70" min="1.20" max="2.20" step="0.01">
+              <p class="hint">e.g. 1.70 = 170 cm</p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="weight">Weight (kg)</label>
+              <input type="number" id="weight" value="72" min="30" max="250" step="0.5">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14z"/><path d="M5 19c3-3 6-5 9-9"/></svg></span>
+            <div>
+              <h2>Eating Habits</h2>
+              <p>Diet patterns are strong drivers of obesity classification.</p>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.4"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14 20c0-2.4 1.4-4.3 3.3-5"/></svg>
+              <div><strong>Family history of overweight</strong><span>Has a family member suffered from being overweight?</span></div>
+            </div>
+            <label class="switch"><input type="checkbox" id="family_history" checked><span class="track"></span><span class="thumb"></span></label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 9c0-3 3.5-5 8-5s8 2 8 5"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M5 15h14"/><path d="M6 17.5c0 1.4 1.4 2.5 2.8 2.5h6.4c1.4 0 2.8-1.1 2.8-2.5"/></svg>
+              <div><strong>Frequent high-calorie food</strong><span>Do you eat high caloric food frequently?</span></div>
+            </div>
+            <label class="switch"><input type="checkbox" id="favc" checked><span class="track"></span><span class="thumb"></span></label>
+          </div>
+
+          <div class="slider-field" style="margin-top:1.2rem">
+            <div class="slider-top">
+              <div class="label-group">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14z"/></svg>
+                <strong>Vegetable consumption</strong>
+              </div>
+              <span class="slider-value" id="fcvc-val">Sometimes</span>
+            </div>
+            <input type="range" id="fcvc" min="1" max="3" step="0.1" value="2.5">
+            <div class="slider-scale"><span>Rarely</span><span>Sometimes</span><span>Every meal</span></div>
+          </div>
+
+          <div class="slider-field">
+            <div class="slider-top">
+              <div class="label-group">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.9"/></svg>
+                <strong>Main meals per day</strong>
+              </div>
+              <span class="slider-value" id="ncp-val">3 meals</span>
+            </div>
+            <input type="range" id="ncp" min="1" max="4" step="1" value="3">
+            <div class="slider-scale"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="caec">Eating between meals</label>
+            <select id="caec">
+              <option value="no">No</option>
+              <option value="Sometimes" selected>Sometimes</option>
+              <option value="Frequently">Frequently</option>
+              <option value="Always">Always</option>
+            </select>
+          </div>
+
+          <div class="slider-field" style="margin-bottom:0">
+            <div class="slider-top">
+              <div class="label-group">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5C9 7 6 10.5 6 14.5a6 6 0 0 0 12 0C18 10.5 15 7 12 2.5z"/></svg>
+                <strong>Water intake</strong>
+              </div>
+              <span class="slider-value" id="ch2o-val">2.0 L/day</span>
+            </div>
+            <input type="range" id="ch2o" min="1" max="3" step="0.1" value="2.0">
+            <div class="slider-scale"><span>&lt;1 L</span><span>~2 L</span><span>&gt;3 L</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>
+            <div>
+              <h2>Lifestyle</h2>
+              <p>Activity, screen time and habits that shape long-term risk.</p>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="5.8" y1="18.2" x2="18.2" y2="5.8"/></svg>
+              <div><strong>Smokes</strong><span>Do you currently smoke?</span></div>
+            </div>
+            <label class="switch"><input type="checkbox" id="smoke"><span class="track"></span><span class="thumb"></span></label>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5V4"/><path d="M9 13l2 2 4-4"/></svg>
+              <div><strong>Monitors calories</strong><span>Do you monitor the calories you eat daily?</span></div>
+            </div>
+            <label class="switch"><input type="checkbox" id="scc"><span class="track"></span><span class="thumb"></span></label>
+          </div>
+
+          <div class="slider-field" style="margin-top:1.2rem">
+            <div class="slider-top">
+              <div class="label-group">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+                <strong>Physical activity</strong>
+              </div>
+              <span class="slider-value" id="faf-val">1–2 days</span>
+            </div>
+            <input type="range" id="faf" min="0" max="3" step="1" value="1">
+            <div class="slider-scale"><span>Never</span><span>1–2d</span><span>2–4d</span><span>4–5d</span></div>
+          </div>
+
+          <div class="slider-field">
+            <div class="slider-top">
+              <div class="label-group">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="12" rx="1.5"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>
+                <strong>Screen time / day</strong>
+              </div>
+              <span class="slider-value" id="tue-val">3–5 hrs</span>
+            </div>
+            <input type="range" id="tue" min="0" max="2" step="1" value="1">
+            <div class="slider-scale"><span>0–2h</span><span>3–5h</span><span>5h+</span></div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="calc">Alcohol consumption</label>
+            <select id="calc">
+              <option value="no">No</option>
+              <option value="Sometimes" selected>Sometimes</option>
+              <option value="Frequently">Frequently</option>
+              <option value="Always">Always</option>
+            </select>
+          </div>
+
+          <div class="field" style="margin-bottom:0">
+            <label class="field-label" for="mtrans">Main transportation</label>
+            <select id="mtrans">
+              <option value="Public_Transportation" selected>Public transportation</option>
+              <option value="Automobile">Automobile</option>
+              <option value="Motorbike">Motorbike</option>
+              <option value="Bike">Bike</option>
+              <option value="Walking">Walking</option>
+            </select>
+          </div>
+        </section>
+
+        <button class="submit-btn" type="submit" id="submit-btn">
+          <svg class="icon btn-icon" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="submit-label">Analyze My Risk</span>
+        </button>
+      </form>
+
+      <p class="footnote">Trained on the <strong>UCI Estimation of Obesity Levels</strong> dataset (2,111 records, 7 classes). Built to demonstrate an end-to-end ML product — results are illustrative only.</p>
+    </div>
+
+    <!-- ============ RESULTS COLUMN ============ -->
+    <div class="results-col">
+
+      <div class="state-card" id="empty-state">
+        <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.2"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg></span>
+        <h3>Your results will appear here</h3>
+        <p>Fill in the assessment on the left and press <strong>Analyze My Risk</strong> to see your BMI, predicted classification and what drove the model's decision.</p>
+      </div>
+
+      <div class="state-card" id="loading-state" style="display:none">
+        <span class="icon-wrap"><span class="spinner" style="display:inline-block;width:1.3rem;height:1.3rem;border-color:var(--border);border-top-color:var(--teal)"></span></span>
+        <h3>Analyzing…</h3>
+        <p>Running your data through the model.</p>
+      </div>
+
+      <div class="state-card error-card" id="error-state" style="display:none">
+        <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3.2 22 20.8H2L12 3.2z"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><circle cx="12" cy="17.3" r=".6" fill="currentColor" stroke="none"/></svg></span>
+        <h3>Couldn't reach the prediction service</h3>
+        <p>The request to <code>/predict</code> failed. Check that the backend is running, then try again.</p>
+        <div class="error-msg" id="error-detail">—</div><br>
+        <button class="retry-btn" id="retry-btn" type="button">Try again</button>
+      </div>
+
+      <div id="results-content" style="display:none">
+
+        <div class="pred-card" id="pred-card">
+          <div class="pred-top">
+            <span class="pred-eyebrow">Predicted Classification</span>
+            <span class="accuracy-tag" id="accuracy-tag">Model accuracy —</span>
+          </div>
+          <div class="pred-badge">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="4.4"/><path d="M8 12.8l-2 7.5 6-3.2 6 3.2-2-7.5"/></svg></span>
+            <div>
+              <p class="pred-name" id="pred-name">—</p>
+              <p class="pred-sub" id="pred-sub">Awaiting input</p>
+            </div>
+          </div>
+          <div class="confidence-row">
+            <div class="confidence-labels"><span>Model confidence</span><strong id="confidence-value">—</strong></div>
+            <div class="confidence-track"><div class="confidence-fill" id="confidence-fill"></div></div>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4-5"/><circle cx="12" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg></span>
+            <div>
+              <h2>Body Mass Index</h2>
+              <p>Where your BMI falls across the standard weight categories.</p>
+            </div>
+          </div>
+          <div class="gauge-value-row">
+            <span class="gauge-value" id="bmi-value">—</span>
+            <span class="gauge-cat" id="bmi-cat-badge">—</span>
+          </div>
+          <div class="gauge" aria-hidden="true">
+            <div class="gauge-track">
+              <div class="gauge-zone" data-zone="under" style="width:14%"></div>
+              <div class="gauge-zone" data-zone="normal" style="width:26%"></div>
+              <div class="gauge-zone" data-zone="over" style="width:20%"></div>
+              <div class="gauge-zone" data-zone="obese" style="width:40%"></div>
+            </div>
+            <div class="gauge-marker" id="gauge-marker" style="left:14%">
+              <span class="gauge-marker-value" id="gauge-marker-value">—</span>
+              <span class="gauge-marker-pin"></span>
+            </div>
+          </div>
+          <div class="gauge-labels">
+            <span>Underweight<br><small>&lt;18.5</small></span>
+            <span>Normal<br><small>18.5–25</small></span>
+            <span>Overweight<br><small>25–30</small></span>
+            <span>Obese<br><small>&gt;30</small></span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>
+            <div>
+              <h2>Classification Probabilities</h2>
+              <p>Likelihood across all 7 obesity classes.</p>
+            </div>
+          </div>
+          <div class="bar-list" id="prob-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <span class="icon-wrap"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8" fill="currentColor" stroke="none"/></svg></span>
+            <div>
+              <h2>What Drove This Prediction</h2>
+              <p>Relative importance of each input feature to the model.</p>
+            </div>
+          </div>
+          <div class="bar-list" id="feature-list"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- theme ---------------- */
+  var root = document.documentElement;
+  var THEME_KEY = 'obesity-demo-theme';
+  function applyTheme(t) { root.setAttribute('data-theme', t); }
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  });
+
+  /* ---------------- slider live labels ---------------- */
+  function wordFor(id, v) {
+    v = parseFloat(v);
+    if (id === 'fcvc') return v < 1.5 ? 'Rarely' : (v < 2.5 ? 'Sometimes' : 'Every meal');
+    if (id === 'ncp') return Math.round(v) + ' meal' + (Math.round(v) === 1 ? '' : 's');
+    if (id === 'ch2o') return v.toFixed(1) + ' L/day';
+    if (id === 'faf') return ['Never', '1–2 days', '2–4 days', '4–5 days'][Math.round(v)];
+    if (id === 'tue') return ['0–2 hrs', '3–5 hrs', '5+ hrs'][Math.round(v)];
+    return String(v);
+  }
+  ['fcvc', 'ncp', 'ch2o', 'faf', 'tue'].forEach(function (id) {
+    var input = document.getElementById(id);
+    var out = document.getElementById(id + '-val');
+    var update = function () { out.textContent = wordFor(id, input.value); };
+    input.addEventListener('input', update);
+    update();
+  });
+
+  /* ---------------- bucket classification ---------------- */
+  function classifyBucket(label) {
+    var t = String(label || '').toLowerCase();
+    if (t.indexOf('under') !== -1 || t.indexOf('insufficient') !== -1) return 'under';
+    if (t.indexOf('normal') !== -1) return 'normal';
+    if (t.indexOf('overweight') !== -1) return 'over';
+    if (t.indexOf('obes') !== -1) return 'obese';
+    return 'normal';
+  }
+  var bucketIcons = {
+    under: '<circle cx="12" cy="8.2" r="4.4"/><path d="M8 12.8l-2 7.5 6-3.2 6 3.2-2-7.5"/>',
+    normal: '<path d="M12 21s-7-4.4-9-9C1.4 8 3.2 4.6 6.6 4.6c1.9 0 3.4 1.1 4 2.3.6-1.2 2.1-2.3 4-2.3C18 4.6 19.8 8 21 12c-2 4.6-9 9-9 9z"/>',
+    over: '<path d="M12 3.2 22 20.8H2L12 3.2z"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><circle cx="12" cy="17.3" r=".6" fill="currentColor" stroke="none"/>',
+    obese: '<path d="M12 3.2 22 20.8H2L12 3.2z"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><circle cx="12" cy="17.3" r=".6" fill="currentColor" stroke="none"/>'
+  };
+  var bucketNoun = { under: 'Below the healthy weight range', normal: 'Within the healthy weight range', over: 'Above the healthy weight range', obese: 'Well above the healthy weight range' };
+
+  function bmiZone(bmi) {
+    if (bmi < 18.5) return 'under';
+    if (bmi < 25) return 'normal';
+    if (bmi < 30) return 'over';
+    return 'obese';
+  }
+
+  /* ---------------- state elements ---------------- */
+  var emptyState = document.getElementById('empty-state');
+  var loadingState = document.getElementById('loading-state');
+  var errorState = document.getElementById('error-state');
+  var resultsContent = document.getElementById('results-content');
+  var submitBtn = document.getElementById('submit-btn');
+  var submitLabel = document.getElementById('submit-label');
+
+  function showOnly(el) {
+    [emptyState, loadingState, errorState, resultsContent].forEach(function (e) {
+      e.style.display = (e === el) ? (e === resultsContent ? 'block' : 'block') : 'none';
+    });
+  }
+
+  function collectPayload() {
+    return {
+      gender: document.getElementById('gender').value,
+      age: parseInt(document.getElementById('age').value, 10),
+      height: parseFloat(document.getElementById('height').value),
+      weight: parseFloat(document.getElementById('weight').value),
+      family_history: document.getElementById('family_history').checked ? 'yes' : 'no',
+      favc: document.getElementById('favc').checked ? 'yes' : 'no',
+      fcvc: parseFloat(document.getElementById('fcvc').value),
+      ncp: parseFloat(document.getElementById('ncp').value),
+      caec: document.getElementById('caec').value,
+      smoke: document.getElementById('smoke').checked ? 'yes' : 'no',
+      ch2o: parseFloat(document.getElementById('ch2o').value),
+      scc: document.getElementById('scc').checked ? 'yes' : 'no',
+      faf: parseFloat(document.getElementById('faf').value),
+      tue: parseFloat(document.getElementById('tue').value),
+      calc: document.getElementById('calc').value,
+      mtrans: document.getElementById('mtrans').value
+    };
+  }
+
+  function renderBars(container, items, opts) {
+    container.innerHTML = '';
+    items.forEach(function (item, i) {
+      var row = document.createElement('div');
+      row.className = 'bar-row' + (i === 0 ? ' is-top' : '');
+      var top = document.createElement('div');
+      top.className = 'bar-row-top';
+      var labelSpan = document.createElement('span');
+      labelSpan.className = 'bar-label';
+      labelSpan.textContent = item.label;
+      if (i === 0) {
+        var tag = document.createElement('span');
+        tag.className = 'top-tag';
+        tag.textContent = opts.topTag;
+        labelSpan.appendChild(document.createTextNode(' '));
+        labelSpan.appendChild(tag);
+      }
+      var valueSpan = document.createElement('span');
+      valueSpan.className = 'bar-value';
+      valueSpan.textContent = item.valueText;
+      top.appendChild(labelSpan);
+      top.appendChild(valueSpan);
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill' + (item.bucket ? ' b-' + item.bucket : '');
+      track.appendChild(fill);
+      row.appendChild(top);
+      row.appendChild(track);
+      container.appendChild(row);
+      requestAnimationFrame(function () { fill.style.width = item.widthPct + '%'; });
+    });
+  }
+
+  function renderResults(data) {
+    var bucket = classifyBucket(data.prediction);
+    var predCard = document.getElementById('pred-card');
+    predCard.className = 'pred-card bucket-' + bucket;
+    document.getElementById('accuracy-tag').textContent = 'Model accuracy ' + (data.model_accuracy != null ? (data.model_accuracy * 100).toFixed(1) + '%' : '—');
+    document.getElementById('pred-name').textContent = data.prediction;
+    document.getElementById('pred-sub').textContent = bucketNoun[bucket];
+    predCard.querySelector('.pred-badge .icon-wrap').innerHTML = '<svg class="icon" viewBox="0 0 24 24">' + bucketIcons[bucket] + '</svg>';
+    var conf = data.confidence != null ? data.confidence * 100 : 0;
+    document.getElementById('confidence-value').textContent = conf.toFixed(1) + '%';
+    requestAnimationFrame(function () { document.getElementById('confidence-fill').style.width = conf + '%'; });
+
+    var bmi = data.bmi;
+    document.getElementById('bmi-value').textContent = (bmi != null ? bmi.toFixed(1) : '—');
+    var zone = bmiZone(bmi);
+    var catBadge = document.getElementById('bmi-cat-badge');
+    catBadge.textContent = data.bmi_category || (zone.charAt(0).toUpperCase() + zone.slice(1));
+    catBadge.style.color = 'var(--' + ({ under: 'blue', normal: 'teal-deep', over: 'amber', obese: 'coral' })[zone] + ')';
+    catBadge.style.background = 'var(--' + ({ under: 'blue-tint', normal: 'teal-tint', over: 'amber-tint', obese: 'coral-tint' })[zone] + ')';
+    document.querySelectorAll('.gauge-zone').forEach(function (z) {
+      z.classList.toggle('active-zone', z.getAttribute('data-zone') === zone);
+    });
+    var pct = Math.max(2, Math.min(98, ((bmi - 15) / 25) * 100));
+    var marker = document.getElementById('gauge-marker');
+    requestAnimationFrame(function () { marker.style.left = pct + '%'; });
+    document.getElementById('gauge-marker-value').textContent = (bmi != null ? bmi.toFixed(1) : '—');
+
+    var probs = (data.class_probabilities || []).slice().sort(function (a, b) { return b.probability - a.probability; });
+    renderBars(document.getElementById('prob-list'), probs.map(function (p) {
+      return { label: p.label, valueText: (p.probability * 100).toFixed(1) + '%', widthPct: p.probability * 100, bucket: classifyBucket(p.label) };
+    }), { topTag: 'Predicted' });
+
+    var feats = (data.feature_importance || []).slice().sort(function (a, b) { return b.importance - a.importance; });
+    var maxImp = feats.length ? feats[0].importance : 1;
+    renderBars(document.getElementById('feature-list'), feats.map(function (f) {
+      return { label: f.feature, valueText: f.importance.toFixed(3), widthPct: maxImp > 0 ? (f.importance / maxImp) * 100 : 0, bucket: 'normal' };
+    }), { topTag: 'Top driver' });
+
+    showOnly(resultsContent);
+  }
+
+  async function runPrediction() {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitLabel.textContent = 'Analyzing…';
+    showOnly(loadingState);
+    try {
+      var res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(collectPayload())
+      });
+      if (!res.ok) {
+        var msg = 'Request failed with status ' + res.status;
+        try {
+          var errJson = await res.json();
+          if (errJson && errJson.detail) msg = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
+        } catch (parseErr) {}
+        throw new Error(msg);
+      }
+      var data = await res.json();
+      renderResults(data);
+    } catch (err) {
+      document.getElementById('error-detail').textContent = (err && err.message) ? err.message : 'Unknown error';
+      showOnly(errorState);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+      submitLabel.textContent = 'Analyze My Risk';
+    }
+  }
+
+  document.getElementById('assessment-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    runPrediction();
+  });
+  document.getElementById('retry-btn').addEventListener('click', runPrediction);
+})();
+</script>
 </body>
 </html>
